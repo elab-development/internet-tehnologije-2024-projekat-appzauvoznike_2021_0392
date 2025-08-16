@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class ProductImage extends Model
 {
     use HasFactory;
+      protected $fillable = [
+        'product_id',
+        'url',
+        'alt',
+        'is_primary',
+        'sort_order',
+    ];
+
+    protected $casts = [
+        'is_primary' => 'boolean',
+        'sort_order' => 'integer',
+    ];
 }
