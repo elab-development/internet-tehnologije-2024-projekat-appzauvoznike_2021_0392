@@ -28,4 +28,10 @@ class ContainerItem extends Model
         'unit_price'           => 'decimal:2',
         'import_cost_per_unit' => 'decimal:2',
     ];
+    
+        public function container()           { return $this->belongsTo(Container::class); }
+        public function offerItem()           { return $this->belongsTo(OfferItem::class); }
+        // pomoćne prečice (korisno u prikazu)
+        public function product()             { return $this->hasOneThrough(Product::class, OfferItem::class, 'id', 'id', 'offer_item_id', 'product_id'); }
+
 }

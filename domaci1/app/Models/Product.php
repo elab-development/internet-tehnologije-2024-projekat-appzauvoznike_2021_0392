@@ -33,4 +33,8 @@ class Product extends Model
         'is_active'       => 'boolean',
         'base_price'      => 'decimal:2',
     ];
+    public function supplier()            { return $this->belongsTo(Company::class, 'supplier_company_id'); }
+    public function category()            { return $this->belongsTo(Category::class); } // ili belongsToMany ako koristiš pivot
+    public function images()              { return $this->hasMany(ProductImage::class); }
+    public function offerItems()          { return $this->hasMany(OfferItem::class); }
 }

@@ -27,4 +27,6 @@ class OfferItem extends Model
         'min_order_qty'       => 'integer',
         'pack_qty'            => 'integer',
     ];
+    public function offer()               { return $this->belongsTo(Offer::class); }
+    public function product()             { return $this->belongsTo(Product::class); }
 }

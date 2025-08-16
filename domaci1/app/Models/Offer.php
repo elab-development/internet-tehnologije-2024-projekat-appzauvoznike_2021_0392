@@ -25,4 +25,6 @@ class Offer extends Model
         'valid_to'      => 'date',
         'lead_time_days'=> 'integer',
     ];
+    public function supplier()            { return $this->belongsTo(Company::class, 'supplier_company_id'); }
+    public function items()               { return $this->hasMany(OfferItem::class); }
 }

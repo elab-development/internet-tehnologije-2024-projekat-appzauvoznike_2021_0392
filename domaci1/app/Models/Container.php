@@ -28,4 +28,6 @@ class Container extends Model
         'max_volume_m3'          => 'decimal:3',
         'estimated_freight_cost' => 'decimal:2',
     ];
+    public function importer()            { return $this->belongsTo(Company::class, 'importer_company_id'); }
+    public function items()               { return $this->hasMany(ContainerItem::class); }
 }

@@ -20,4 +20,5 @@ class ProductImage extends Model
         'is_primary' => 'boolean',
         'sort_order' => 'integer',
     ];
+    public function product()             { return $this->belongsTo(Product::class); }
 }

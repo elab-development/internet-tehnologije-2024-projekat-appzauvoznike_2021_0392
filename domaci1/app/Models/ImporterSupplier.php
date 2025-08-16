@@ -24,4 +24,8 @@ class ImporterSupplier extends Model
         'started_at' => 'date',
         'ended_at'   => 'date',
     ];
+ 
+    public function importer()            { return $this->belongsTo(Company::class, 'importer_company_id'); }
+    public function supplier()            { return $this->belongsTo(Company::class, 'supplier_company_id'); }
+
 }
