@@ -14,7 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('product_images', function (Blueprint $table) {
-            $table->id();
+           $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('url');
+            $table->string('alt')->nullable();
+            $table->boolean('is_primary')->default(false);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }

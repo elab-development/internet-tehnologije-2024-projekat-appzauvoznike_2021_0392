@@ -14,7 +14,16 @@ return new class extends Migration
     public function up()
     {
         Schema::create('offers', function (Blueprint $table) {
-            $table->id();
+           $table->id();
+            $table->foreignId('supplier_company_id')->constrained('companies')->onDelete('cascade');
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->date('valid_from')->nullable();
+            $table->date('valid_to')->nullable();
+            $table->string('incoterm')->nullable();
+            $table->string('payment_terms')->nullable();
+            $table->integer('lead_time_days')->nullable();
+            $table->enum('status',['draft','published','archived'])->default('draft');
             $table->timestamps();
         });
     }

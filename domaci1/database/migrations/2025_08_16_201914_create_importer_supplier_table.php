@@ -15,7 +15,15 @@ return new class extends Migration
     {
         Schema::create('importer_supplier', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('importer_company_id')->constrained('companies')->onDelete('cascade');
+            $table->foreignId('supplier_company_id')->constrained('companies')->onDelete('cascade');
+            $table->enum('status',['pending','active','blocked'])->default('pending');
+            $table->date('started_at')->nullable();
+            $table->date('ended_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->unique(['importer_company_id','supplier_company_id']);
         });
     }
 
