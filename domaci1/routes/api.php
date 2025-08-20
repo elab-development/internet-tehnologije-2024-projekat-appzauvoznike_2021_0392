@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\ImporterSupplierController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+// Kompanije
+Route::apiResource('companies', CompanyController::class);
+
+// Pretraga dobavljača
+Route::get('suppliers/search', [CompanyController::class, 'searchSuppliers']);
+
+// Partnerstva (uvoznik–dobavljač)
+Route::apiResource('partnerships', ImporterSupplierController::class);
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
