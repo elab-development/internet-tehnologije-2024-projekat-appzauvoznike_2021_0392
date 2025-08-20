@@ -18,8 +18,22 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
+
+        // primer ograničenja na role
+        Route::get('/admin-only', function () {
+            return ['message' => 'Samo admini vide ovo'];
+        })->middleware('role:admin');
+
+        Route::get('/suppliers-only', function () {
+            return ['message' => 'Samo dobavljači vide ovo'];
+        })->middleware('role:supplier');
+
+        Route::get('/importers-or-admins', function () {
+            return ['message' => 'Uvoznici i admini vide ovo'];
+        })->middleware('role:importer,admin');
     });
 });
