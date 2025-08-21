@@ -7,6 +7,7 @@ use App\Models\ProductImage;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImageController extends Controller
 {
@@ -48,13 +49,18 @@ class ProductImageController extends Controller
         }
 
         $data = $request->validate([
-            'url'        => 'required|string',
+            'image'      => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'alt'        => 'nullable|string',
             'is_primary' => 'boolean',
             'sort_order' => 'integer',
         ]);
 
-        // Ako je postavljena nova primarna, resetuj ostale
+        // upload fajla
+        $path = $request->file('image')->store('products', 'public');
+        $data['url'] = '/storage/' . $path;
+        $data['product_id'] = $product->id;
+
+        // ako je primarna, resetuj ostale
         if (!empty($data['is_primary']) && $data['is_primary'] === true) {
             $product->images()->update(['is_primary' => false]);
         }
@@ -71,12 +77,10 @@ class ProductImageController extends Controller
     {
         $user = Auth::user();
 
-        // validacija da slika pripada proizvodu
         if ($productImage->product_id !== $product->id) {
             return response()->json(['message'=>'Not found'], 404);
         }
 
-        // proveri prava
         if ($user->role === 'supplier' && $product->supplier_company_id !== $user->company_id) {
             return response()->json(['message'=>'Forbidden'], 403);
         }
@@ -110,11 +114,22 @@ class ProductImageController extends Controller
         }
 
         $data = $request->validate([
-            'url'        => 'string',
+            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'alt'        => 'nullable|string',
             'is_primary' => 'boolean',
             'sort_order' => 'integer',
         ]);
+
+        // ako je uploadovana nova slika → obriši staru
+        if ($request->hasFile('image')) {
+            if ($productImage->url && str_starts_with($productImage->url, '/storage/')) {
+                $oldPath = str_replace('/storage/', '', $productImage->url);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('image')->store('products', 'public');
+            $data['url'] = '/storage/' . $path;
+        }
 
         if (!empty($data['is_primary']) && $data['is_primary'] === true) {
             $product->images()->update(['is_primary' => false]);
@@ -139,7 +154,14 @@ class ProductImageController extends Controller
             return response()->json(['message'=>'Not found'], 404);
         }
 
+        // obriši fajl sa diska
+        if ($productImage->url && str_starts_with($productImage->url, '/storage/')) {
+            $oldPath = str_replace('/storage/', '', $productImage->url);
+            Storage::disk('public')->delete($oldPath);
+        }
+
         $productImage->delete();
+
         return response()->json(['message'=>'Image deleted']);
     }
 }
