@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\ContainerController;
 use App\Http\Controllers\Api\ImporterSupplierController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductImageController;
@@ -59,5 +60,13 @@ Route::prefix('auth')->group(function () {
 
         Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('products.images', ProductImageController::class);
+
+         // kontejneri
+        Route::apiResource('containers', ContainerController::class);
+
+        // stavke kontejnera (nested)
+        Route::post('containers/{container}/items', [ContainerController::class, 'addItem']);
+        Route::put('containers/{container}/items/{item}', [ContainerController::class, 'updateItem']);
+        Route::delete('containers/{container}/items/{item}', [ContainerController::class, 'destroyItem']);
 });
 });
