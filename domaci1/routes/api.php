@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ImporterSupplierController;
+use App\Http\Controllers\Api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,4 +48,10 @@ Route::prefix('auth')->group(function () {
             return ['message' => 'Uvoznici i admini vide ovo'];
         })->middleware('role:importer,admin');
     });
+
+
+      Route::apiResource('products', ProductController::class);
+
+        // dodatna ruta za pretragu
+        Route::get('products-search', [ProductController::class, 'search']);
 });
