@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ImporterSupplierController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductImageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,4 +55,9 @@ Route::prefix('auth')->group(function () {
 
         // dodatna ruta za pretragu
         Route::get('products-search', [ProductController::class, 'search']);
+
+
+        Route::middleware('auth:sanctum')->group(function () {
+        Route::apiResource('products.images', ProductImageController::class);
+});
 });
