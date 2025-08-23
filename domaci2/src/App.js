@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import AuthPage from './pages/AuthPage'; 
 import SupplierDashboard from './pages/supplier/SupplierDashboard';
 import SupplierProducts from './pages/supplier/SupplierProducts';
+import SupplierProductForm from './pages/supplier/SupplierProductForm';
 function App() {
   return (
     <Router>
@@ -19,7 +20,8 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
              <Route path="/supplier" element={<SupplierDashboard />} />
              <Route path="/supplier/products" element={<SupplierProducts />} />
-           
+             <Route path="/supplier/products/new" element={<SupplierProductForm />} />
+            <Route path="/supplier/products/:id/edit" element={<SupplierProductForm />} />
           </Routes>
         </div>
       </AuthProvider>
