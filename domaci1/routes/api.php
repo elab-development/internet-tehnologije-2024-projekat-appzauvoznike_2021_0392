@@ -24,6 +24,7 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 });
+Route::get('companies-public', [CompanyController::class, 'index']);
 
 // ==================== ADMIN ====================
 Route::middleware(['auth:sanctum','role:admin'])->prefix('admin')->group(function () {

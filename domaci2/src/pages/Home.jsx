@@ -143,8 +143,8 @@ export default function Home() {
               <p>Napravite nalog i testirajte sve funkcionalnosti kroz demo podatke.</p>
             </div>
             <div className="cta__actions">
-              <a className="btn btn--primary">Kreiraj nalog</a>
-              <a className="btn btn--ghost">Kontakt prodaju</a>
+              <a href="/auth" className="btn btn--primary">Kreiraj nalog</a>
+            
             </div>
           </div>
         </section>

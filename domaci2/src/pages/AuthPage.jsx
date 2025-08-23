@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import api from "../api/axios";
+import useCompanies from "../hooks/useCompanies";
 import "./auth.css";
 
 export default function AuthPage() {
@@ -8,28 +9,27 @@ export default function AuthPage() {
   const [msg, setMsg] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // učitavanje firmi (podesi endpoint ako treba)
+  const { companies, loading: loadingCompanies, error: companiesError } =
+    useCompanies("/companies-public");
+
   // forme
-  const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   const [registerForm, setRegisterForm] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
-    role: "importer",    // admin | importer | supplier
-    company_id: ""       // opciono
+    role: "importer", // importer | supplier
+    company_id: ""    // bira se iz select-a (opciono)
   });
 
-  const handleLoginChange = (e) => {
+  const handleLoginChange = (e) =>
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
-  };
 
-  const handleRegisterChange = (e) => {
+  const handleRegisterChange = (e) =>
     setRegisterForm({ ...registerForm, [e.target.name]: e.target.value });
-  };
 
   const switchMode = () => {
     setMsg(null);
@@ -57,9 +57,8 @@ export default function AuthPage() {
   const onRegister = async (e) => {
     e.preventDefault();
     setLoading(true); setMsg(null); setErrors({});
-    // company_id može ostati prazan – backend ga ima kao nullable
     const payload = { ...registerForm };
-    if (payload.company_id === "") delete payload.company_id;
+    if (!payload.company_id) delete payload.company_id;
 
     try {
       const { data } = await api.post("/auth/register", payload);
@@ -91,10 +90,13 @@ export default function AuthPage() {
           <p className="auth__subtitle">
             {mode === "login"
               ? "Unesite e-mail i lozinku da nastavite."
-              : "Kreirajte nalog i odaberite ulogu."}
+              : "Kreirajte nalog, odaberite ulogu i (opciono) povežite firmu."}
           </p>
 
           {msg && <div className="alert">{msg}</div>}
+          {companiesError && mode === "register" && (
+            <div className="alert">{companiesError}</div>
+          )}
 
           {mode === "login" ? (
             <form onSubmit={onLogin} className="form">
@@ -200,23 +202,32 @@ export default function AuthPage() {
                     value={registerForm.role}
                     onChange={handleRegisterChange}
                     required
+                    className="select"
                   >
                     <option value="importer">Importer</option>
                     <option value="supplier">Supplier</option>
-                    <option value="admin">Admin</option>
+                   
                   </select>
                   {errors.role && <small className="err">{errors.role[0]}</small>}
                 </div>
 
                 <div className="field">
-                  <label>Company ID (opciono)</label>
-                  <input
-                    type="number"
+                  <label>Kompanija (opciono)</label>
+                  <select
                     name="company_id"
                     value={registerForm.company_id}
                     onChange={handleRegisterChange}
-                    placeholder="npr. 1"
-                  />
+                    className="select"
+                    disabled={loadingCompanies}
+                  >
+                    <option value="">— Odaberi kompaniju —</option>
+                    {companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} {c.type ? `(${c.type})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {loadingCompanies && <small className="muted">Učitavanje kompanija…</small>}
                   {errors.company_id && <small className="err">{errors.company_id[0]}</small>}
                 </div>
               </div>
@@ -234,21 +245,6 @@ export default function AuthPage() {
             </form>
           )}
         </div>
-
-        <aside className="auth__aside">
-          <div className="aside__card">
-            <h3>Dobrodošli!</h3>
-            <p className="muted">
-              Upravljajte proizvodima, ponudama, partnerstvima i kontejnerima uz kontrolisan pristup. 
-              Koristite podatke iz demo baze ili kreirajte sopstveni nalog.
-            </p>
-            <ul className="list">
-              <li>Role-based pristup (admin / importer / supplier)</li>
-              <li>REST API sa Sanctum tokenima</li>
-              <li>Moderna UI paleta i glačan UX</li>
-            </ul>
-          </div>
-        </aside>
       </div>
     </div>
   );
