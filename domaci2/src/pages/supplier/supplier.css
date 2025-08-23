@@ -36,3 +36,20 @@
 }
 .table .actions .link { background:none; border:none; color:#bfcde0; cursor:pointer; }
 .table .actions .danger { color: #ffb3b3; }
+/* Polja forme */
+.field textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical; /* korisnik može da promeni visinu */
+  padding: 12px;
+  border-radius: 12px;
+  outline: none;
+  background: rgba(191,205,224,.08);
+  border: 1px solid rgba(191,205,224,.18);
+  color: #fff;
+  font-family: inherit;
+}
+
+.field textarea::placeholder {
+  color: rgba(255,255,255,.45);
+}

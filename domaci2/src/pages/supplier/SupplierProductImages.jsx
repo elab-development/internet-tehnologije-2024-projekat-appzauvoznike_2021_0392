@@ -1,6 +1,6 @@
  
 import React, { useEffect, useState } from "react";
-import { listImages, uploadImage, updateImage, deleteImage } from "../../../api/supplier";
+import { listImages, uploadImage, updateImage, deleteImage } from "../../api/supplier";
 import { useParams } from "react-router-dom";
 
 export default function SupplierProductImages() {
