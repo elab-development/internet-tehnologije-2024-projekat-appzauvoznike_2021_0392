@@ -4,21 +4,7 @@ import "./home.css";
 export default function Home() {
   return (
     <div className="site">
-      <header className="header">
-        <div className="container header__inner">
-          <div className="brand">
-            <span className="brand__logo">IM</span>
-            <span className="brand__name">Import Manager</span>
-          </div>
-
-          <nav className="nav">
-            <a href="#features">Funkcionalnosti</a>
-            <a href="#roles">Uloge</a>
-            <a href="#modules">Moduli</a>
-            <a href="#cta" className="btn btn--ghost">Demo</a>
-          </nav>
-        </div>
-      </header>
+ 
 
       <main>
         {/* Hero */}
@@ -164,21 +150,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="footer">
-        <div className="container footer__inner">
-          <div className="brand brand--muted">
-            <span className="brand__logo">IM</span>
-            <span className="brand__name">Import Manager</span>
-          </div>
-          <nav className="footer__nav">
-            <a href="#features">Funkcionalnosti</a>
-            <a href="#roles">Uloge</a>
-            <a href="#modules">Moduli</a>
-            <a href="#cta">Demo</a>
-          </nav>
-          <div className="footer__copy">© {new Date().getFullYear()} Import Manager</div>
-        </div>
-      </footer>
+ 
     </div>
   );
 }
