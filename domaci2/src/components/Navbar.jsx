@@ -24,21 +24,21 @@ export default function Navbar() {
           {user?.role === "admin" && (
             <>
               <Link to="/admin">Admin</Link>
-              <Link to="/auth" onClick={logout} className="btn btn--ghost">Odjava</Link>
+              <button onClick={logout} className="btn btn--ghost">Odjava</button>
             </>
           )}
 
           {user?.role === "supplier" && (
             <>
               <Link to="/supplier">Supplier</Link>
-              <Link to="/auth" onClick={logout} className="btn btn--ghost">Odjava</Link>
+              <button onClick={logout} className="btn btn--ghost">Odjava</button>
             </>
           )}
 
           {user?.role === "importer" && (
             <>
               <Link to="/importer">Importer</Link>
-              <Link to="/auth" onClick={logout} className="btn btn--ghost">Odjava</Link>
+              <button onClick={logout} className="btn btn--ghost">Odjava</button>
             </>
           )}
         </nav>

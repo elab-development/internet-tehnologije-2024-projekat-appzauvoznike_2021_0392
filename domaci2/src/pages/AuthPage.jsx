@@ -1,28 +1,35 @@
+// src/pages/AuthPage.jsx
 import React, { useState } from "react";
 import api from "../api/axios";
 import useCompanies from "../hooks/useCompanies";
+import { useAuth } from "../context/AuthContext";
 import "./auth.css";
 
 export default function AuthPage() {
+  const { login } = useAuth();
+
   const [mode, setMode] = useState("login"); // 'login' | 'register'
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // učitavanje firmi (podesi endpoint ako treba)
-  const { companies, loading: loadingCompanies, error: companiesError } =
-    useCompanies("/companies-public");
+  // učitavanje firmi za select na registraciji (javni endpoint)
+  const {
+    companies,
+    loading: loadingCompanies,
+    error: companiesError,
+  } = useCompanies("/companies-public");
 
   // forme
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginForm, setLoginForm] = useState({ email: "ana@gmail.com", password: "password" });
 
   const [registerForm, setRegisterForm] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
-    role: "importer", // importer | supplier
-    company_id: ""    // bira se iz select-a (opciono)
+    role: "importer",   // 'importer' | 'supplier'
+    company_id: "",     // iz select-a (opciono)
   });
 
   const handleLoginChange = (e) =>
@@ -39,12 +46,13 @@ export default function AuthPage() {
 
   const onLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); setMsg(null); setErrors({});
+    setLoading(true);
+    setMsg(null);
+    setErrors({});
     try {
       const { data } = await api.post("/auth/login", loginForm);
-      localStorage.setItem("token", data.token);
-      setMsg("Uspešna prijava.");
-      // TODO: redirect npr. na /dashboard
+      // login iz AuthContext-a postavlja token, snima usera i radi redirect po ulozi
+      login(data.user, data.token);
     } catch (err) {
       const res = err.response?.data;
       setMsg(res?.message || "Greška pri prijavi.");
@@ -56,16 +64,16 @@ export default function AuthPage() {
 
   const onRegister = async (e) => {
     e.preventDefault();
-    setLoading(true); setMsg(null); setErrors({});
+    setLoading(true);
+    setMsg(null);
+    setErrors({});
     const payload = { ...registerForm };
     if (!payload.company_id) delete payload.company_id;
 
     try {
       const { data } = await api.post("/auth/register", payload);
-      localStorage.setItem("token", data.token);
-      setMsg("Uspešna registracija.");
-      setMode("login");
-      setLoginForm({ email: registerForm.email, password: "" });
+      // odmah ulogujemo korisnika i preusmerimo ga po ulozi
+      login(data.user, data.token);
     } catch (err) {
       const res = err.response?.data;
       setMsg(res?.message || "Greška pri registraciji.");
@@ -110,7 +118,9 @@ export default function AuthPage() {
                   placeholder="you@example.com"
                   required
                 />
-                {errors.email && <small className="err">{errors.email[0]}</small>}
+                {errors.email && (
+                  <small className="err">{errors.email[0]}</small>
+                )}
               </div>
 
               <div className="field">
@@ -123,10 +133,16 @@ export default function AuthPage() {
                   placeholder="••••••••"
                   required
                 />
-                {errors.password && <small className="err">{errors.password[0]}</small>}
+                {errors.password && (
+                  <small className="err">{errors.password[0]}</small>
+                )}
               </div>
 
-              <button type="submit" className="btn btn--primary w-100" disabled={loading}>
+              <button
+                type="submit"
+                className="btn btn--primary w-100"
+                disabled={loading}
+              >
                 {loading ? "Prijava..." : "Prijavi se"}
               </button>
 
@@ -150,7 +166,9 @@ export default function AuthPage() {
                     placeholder="Ana Anić"
                     required
                   />
-                  {errors.name && <small className="err">{errors.name[0]}</small>}
+                  {errors.name && (
+                    <small className="err">{errors.name[0]}</small>
+                  )}
                 </div>
 
                 <div className="field">
@@ -162,7 +180,9 @@ export default function AuthPage() {
                     onChange={handleRegisterChange}
                     placeholder="+381 6x xxx xxxx"
                   />
-                  {errors.phone && <small className="err">{errors.phone[0]}</small>}
+                  {errors.phone && (
+                    <small className="err">{errors.phone[0]}</small>
+                  )}
                 </div>
               </div>
 
@@ -177,7 +197,9 @@ export default function AuthPage() {
                     placeholder="you@example.com"
                     required
                   />
-                  {errors.email && <small className="err">{errors.email[0]}</small>}
+                  {errors.email && (
+                    <small className="err">{errors.email[0]}</small>
+                  )}
                 </div>
 
                 <div className="field">
@@ -190,7 +212,9 @@ export default function AuthPage() {
                     placeholder="min 6 karaktera"
                     required
                   />
-                  {errors.password && <small className="err">{errors.password[0]}</small>}
+                  {errors.password && (
+                    <small className="err">{errors.password[0]}</small>
+                  )}
                 </div>
               </div>
 
@@ -206,9 +230,10 @@ export default function AuthPage() {
                   >
                     <option value="importer">Importer</option>
                     <option value="supplier">Supplier</option>
-                   
                   </select>
-                  {errors.role && <small className="err">{errors.role[0]}</small>}
+                  {errors.role && (
+                    <small className="err">{errors.role[0]}</small>
+                  )}
                 </div>
 
                 <div className="field">
@@ -227,12 +252,20 @@ export default function AuthPage() {
                       </option>
                     ))}
                   </select>
-                  {loadingCompanies && <small className="muted">Učitavanje kompanija…</small>}
-                  {errors.company_id && <small className="err">{errors.company_id[0]}</small>}
+                  {loadingCompanies && (
+                    <small className="muted">Učitavanje kompanija…</small>
+                  )}
+                  {errors.company_id && (
+                    <small className="err">{errors.company_id[0]}</small>
+                  )}
                 </div>
               </div>
 
-              <button type="submit" className="btn btn--primary w-100" disabled={loading}>
+              <button
+                type="submit"
+                className="btn btn--primary w-100"
+                disabled={loading}
+              >
                 {loading ? "Registracija..." : "Kreiraj nalog"}
               </button>
 
