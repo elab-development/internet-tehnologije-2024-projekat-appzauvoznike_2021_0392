@@ -1,0 +1,38 @@
+/* Osnovno za ovu list stranu */
+.page { color: #fefcfd; padding: 18px 0; }
+.page-head { display:flex; align-items:center; justify-content:space-between; margin: 10px 0 16px; }
+
+.tools { display:flex; gap:8px; margin: 10px 0 16px; }
+.input {
+  padding: 10px 12px; border-radius: 10px; border:1px solid rgba(191,205,224,.18);
+  background: rgba(191,205,224,.08); color:#fff; min-width: 260px;
+}
+
+/* Dugmad – ako već nemaš definicije */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding: .6rem 1rem; border-radius:12px; font-weight:700; text-decoration:none;
+  border: 1px solid rgba(191,205,224,.22); cursor:pointer;
+}
+.btn--primary { background: #3b3355; color:#fff; }
+.btn--ghost { background: transparent; color:#fefcfd; }
+.btn--ghost:hover { background: rgba(191,205,224,.08); }
+
+/* Empty state */
+.empty {
+  border: 1px dashed rgba(255,255,255,.25);
+  border-radius: 14px;
+  padding: 28px;
+  text-align:center;
+  background: rgba(191,205,224,.06);
+}
+
+/* Tabela */
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 12px; text-align:left;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: #fefcfd;
+}
+.table .actions .link { background:none; border:none; color:#bfcde0; cursor:pointer; }
+.table .actions .danger { color: #ffb3b3; }
