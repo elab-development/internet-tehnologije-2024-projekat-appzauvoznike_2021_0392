@@ -9,12 +9,22 @@ use Illuminate\Http\Request;
 class ImporterSupplierController extends Controller
 {
     /**
-     * Lista svih partnerstava
+     * Lista svih partnerstava za ulogovanog importera ili suppliera
      */
-    public function index()
-    {
-        return ImporterSupplier::with(['importer','supplier'])->get();
-    }
+        public function index()
+        {
+            $user = auth()->user();
+
+            $query = ImporterSupplier::with(['importer','supplier']);
+
+            if ($user->role === 'importer') {
+                $query->where('importer_company_id', $user->company_id);
+            } elseif ($user->role === 'supplier') {
+                $query->where('supplier_company_id', $user->company_id);
+            }
+
+            return $query->get();
+        }
 
     /**
      * Kreiranje novog partnerstva

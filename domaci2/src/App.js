@@ -14,6 +14,7 @@ import SupplierOfferForm from './pages/supplier/SupplierOfferForm';
 import Breadcrumbs from './components/Breadcrumbs';
 import ImporterDashboard from './pages/importer/ImporterDashboard';
 import ImporterSuppliers from './pages/importer/ImporterSuppliers';
+import ImporterPartnerships from './pages/importer/ImporterPartnerships';
 function App() {
   return (
     <Router>
@@ -42,7 +43,7 @@ function App() {
             {/* za seminarski */}
            <Route path="/importer" element={<ImporterDashboard />} />
            <Route path="/importer/suppliers" element={<ImporterSuppliers />} />
-          
+            <Route path="/importer/partnerships" element={<ImporterPartnerships />} />
           </Routes>
         </div>
       </AuthProvider>

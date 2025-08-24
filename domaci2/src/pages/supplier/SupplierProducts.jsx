@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchMyProducts, deleteProduct } from "../../api/supplier";
 import "./supplier.css";
 
-const PER_PAGE_OPTIONS = [5, 10, 20, 50];
+const PER_PAGE_OPTIONS = [2, 10, 20, 50];
 
 export default function SupplierProducts() {
   const [all, setAll] = useState([]);         // svi proizvodi (jednokratno učitani)

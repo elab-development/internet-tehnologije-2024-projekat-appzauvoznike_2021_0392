@@ -32,7 +32,8 @@ Route::middleware(['auth:sanctum','role:admin'])->prefix('admin')->group(functio
     Route::apiResource('companies', CompanyController::class);
 
     // Admin vidi i upravlja svim partnerstvima
-    Route::apiResource('partnerships', ImporterSupplierController::class);
+   Route::apiResource('partnerships', ImporterSupplierController::class)
+        ->parameters(['partnerships' => 'importerSupplier']);
 
     // Admin ima pregled svih proizvoda i ponuda
     Route::apiResource('products', ProductController::class)->only(['index','show']);
@@ -71,7 +72,9 @@ Route::middleware(['auth:sanctum','role:importer'])->prefix('importer')->group(f
     Route::get('suppliers/search', [CompanyController::class, 'searchSuppliers']);
 
     // Importer može upravljati partnerstvima sa dobavljačima
-    Route::apiResource('partnerships', ImporterSupplierController::class)->only(['index','store','update','destroy','show']);
+    Route::apiResource('partnerships', ImporterSupplierController::class)
+        ->only(['index','store','update','destroy','show'])
+        ->parameters(['partnerships' => 'importerSupplier']);
 
     // Importer vidi proizvode i ponude samo partner dobavljača
     Route::apiResource('products', ProductController::class)->only(['index','show']);

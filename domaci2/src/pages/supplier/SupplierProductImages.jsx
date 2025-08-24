@@ -30,7 +30,7 @@ export default function SupplierProductImages() {
   const onDelete = async (imageId) => {
     if (!window.confirm("Obrisati sliku?")) return;
     await deleteImage(id, imageId);
-    // optimističko ažuriranje
+
     setItems((prev) => prev.filter((x) => x.id !== imageId));
   };
 

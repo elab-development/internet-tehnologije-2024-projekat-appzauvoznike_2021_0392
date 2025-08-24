@@ -17,7 +17,6 @@ function humanize(segment) {
   if (/^\d+$/.test(s)) return `#${s}`;
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
-
 export default function Breadcrumbs() {
   const { pathname } = useLocation();
 
