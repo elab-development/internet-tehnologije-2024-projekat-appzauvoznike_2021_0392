@@ -1,88 +1,136 @@
+/* ================================
+   Admin (dark theme), scoped na .admin
+   ================================ */
 
+.admin {
+  --bg: #0b1020;             /* glavni background (tamni) */
+  --panel: #12172a;          /* ploče/kartice */
+  --panel-soft: #101629;     /* malo tamnije za hero/tabs bg */
+  --border: rgba(255,255,255,.06);
+  --muted: rgba(255,255,255,.65);
+  --text: #eef2ff;           /* osnovni tekst */
+  --text-soft: rgba(238,242,255,.85);
+  --accent: #7c9cff;         /* ljubičasto-plava */
+  --accent-2: #4f7bff;
+  --ok: #34d399;
+  --danger: #fb7185;
+}
 
 .admin .admin-hero {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
-  background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(59,130,246,.06));
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 16px;
-  padding: 20px;
+  background: radial-gradient(90% 120% at 0% 0%, rgba(124,156,255,.16), transparent 60%),
+              radial-gradient(90% 140% at 100% 0%, rgba(79,123,255,.12), transparent 65%),
+              var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  color: var(--text);
+  box-shadow: 0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
 }
 
 .admin .admin-hero__txt h1 {
-  margin: 0 0 4px 0;
-  font-size: 24px;
+  margin: 0 0 6px 0;
+  font-size: 26px;
+  letter-spacing: .2px;
 }
 .admin .admin-hero__txt p {
   margin: 0;
-  opacity: .8;
+  color: var(--muted);
 }
 
+.admin .admin-hero__cta .btn--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1020;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(124,156,255,.28);
+}
+.admin .admin-hero__cta .btn--primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
   margin-top: 18px;
-  border-bottom: 1px solid rgba(0,0,0,.06);
+  border-bottom: 1px solid var(--border);
 }
 .tabs a {
   padding: 10px 14px;
   border-radius: 999px;
   text-decoration: none;
-  color: inherit;
+  color: var(--text-soft);
+  transition: background .2s ease, color .2s ease;
 }
-.tabs a:hover {
-  background: rgba(0,0,0,.04);
-}
-.tabs a.active {
-  background: #111827;
-  color: #fff;
-}
+.tabs a:hover { background: rgba(124,156,255,.12); color: var(--text); }
+.tabs a.active { background: var(--panel-soft); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
 
-.admin .admin-body { margin-top: 20px; }
+.admin .admin-body { margin-top: 20px; color: var(--text); }
 
 /* KPI */
 .kpi {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-  gap: 12px;
-  margin: 12px 0 20px 0;
+  gap: 14px;
+  margin: 14px 0 22px 0;
 }
 .kpi__card {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
 }
 .kpi__value {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
+  color: #fff;
 }
-.kpi__title { margin-top: 2px; font-weight: 600; }
-.kpi__sub { margin-top: 2px; font-size: 12px; opacity: .7; }
+.kpi__title { margin-top: 4px; font-weight: 600; color: var(--text-soft); }
+.kpi__sub { margin-top: 2px; font-size: 12px; color: var(--muted); }
 
-/* Panel */
+/* Panel (grafikon, tekst blokovi) */
 .panel {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   padding: 16px;
-  margin-top: 12px;
+  margin-top: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
 }
 .panel__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 8px;
 }
+.panel__head h3 { margin: 0; font-size: 16px; color: #fff; }
+.panel .muted { color: var(--muted); }
 
-/* Chart */
+/* Chart (koristi CSS varijable umesto fiksnih boja) */
 .chart { width: 100%; overflow: hidden; }
-.ch-axis { stroke: rgba(0,0,0,.12); }
-.ch-line { stroke: #111827; }
-.ch-dot { fill: #111827; }
-.ch-xlbl { font-size: 11px; fill: rgba(0,0,0,.6); }
-.ch-ylbl { font-size: 11px; fill: rgba(0,0,0,.8); }
+.ch-axis { stroke: rgba(255,255,255,.18); }
+.ch-line { stroke: var(--accent-2); }
+.ch-dot { fill: var(--accent-2); }
+.ch-xlbl { font-size: 11px; fill: var(--muted); }
+.ch-ylbl { font-size: 11px; fill: var(--text-soft); }
+
+/* Helper badge boje (ako ih koristiš u tabelama) */
+.badge--active { background: rgba(52,211,153,.16); color: var(--ok); }
+.badge--blocked { background: rgba(251,113,133,.16); color: var(--danger); }
+.badge--pending { background: rgba(124,156,255,.16); color: var(--accent); }
+
+/* Ako ti body nema dark background globalno, možeš da ga setuješ ovde za admin stranicu */
+.admin.page { background: var(--bg); }
+/* Bar & Donut styling */
+.ch-bar { fill: var(--accent-2); opacity: .9; }
+.ch-bar:hover { opacity: 1; }
+
+.ch-slice { transition: opacity .2s ease; }
+.ch-slice:hover { opacity: .85; }
