@@ -4,6 +4,11 @@ import api from "../api/axios";
 import useCompanies from "../hooks/useCompanies";
 import { useAuth } from "../context/AuthContext";
 import "./auth.css";
+ 
+import FormField from "../components/FormField";
+import Input from "../components/Input";
+import Select from "../components/Select";
+import Button from "../components/Button";
 
 export default function AuthPage() {
   const { login } = useAuth();
@@ -13,23 +18,24 @@ export default function AuthPage() {
   const [msg, setMsg] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // učitavanje firmi za select na registraciji (javni endpoint)
   const {
     companies,
     loading: loadingCompanies,
     error: companiesError,
   } = useCompanies("/companies-public");
 
-  // forme
-  const [loginForm, setLoginForm] = useState({ email: "ana@gmail.com", password: "password" });
+  const [loginForm, setLoginForm] = useState({
+    email: "ana@gmail.com",
+    password: "password",
+  });
 
   const [registerForm, setRegisterForm] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
-    role: "importer",   // 'importer' | 'supplier'
-    company_id: "",     // iz select-a (opciono)
+    role: "importer",
+    company_id: "",
   });
 
   const handleLoginChange = (e) =>
@@ -51,7 +57,6 @@ export default function AuthPage() {
     setErrors({});
     try {
       const { data } = await api.post("/auth/login", loginForm);
-      // login iz AuthContext-a postavlja token, snima usera i radi redirect po ulozi
       login(data.user, data.token);
     } catch (err) {
       const res = err.response?.data;
@@ -72,7 +77,6 @@ export default function AuthPage() {
 
     try {
       const { data } = await api.post("/auth/register", payload);
-      // odmah ulogujemo korisnika i preusmerimo ga po ulozi
       login(data.user, data.token);
     } catch (err) {
       const res = err.response?.data;
@@ -108,9 +112,8 @@ export default function AuthPage() {
 
           {mode === "login" ? (
             <form onSubmit={onLogin} className="form">
-              <div className="field">
-                <label>Email</label>
-                <input
+              <FormField label="Email" error={errors.email?.[0]}>
+                <Input
                   type="email"
                   name="email"
                   value={loginForm.email}
@@ -118,14 +121,10 @@ export default function AuthPage() {
                   placeholder="you@example.com"
                   required
                 />
-                {errors.email && (
-                  <small className="err">{errors.email[0]}</small>
-                )}
-              </div>
+              </FormField>
 
-              <div className="field">
-                <label>Lozinka</label>
-                <input
+              <FormField label="Lozinka" error={errors.password?.[0]}>
+                <Input
                   type="password"
                   name="password"
                   value={loginForm.password}
@@ -133,63 +132,51 @@ export default function AuthPage() {
                   placeholder="••••••••"
                   required
                 />
-                {errors.password && (
-                  <small className="err">{errors.password[0]}</small>
-                )}
-              </div>
+              </FormField>
 
-              <button
+              <Button
+                as="button"
                 type="submit"
-                className="btn btn--primary w-100"
+                variant="primary"
+                className="w-100"
                 disabled={loading}
               >
                 {loading ? "Prijava..." : "Prijavi se"}
-              </button>
+              </Button>
 
               <div className="switch">
                 Nemaš nalog?{" "}
-                <button type="button" className="link" onClick={switchMode}>
+                <Button as="button" type="button" variant="link" onClick={switchMode}>
                   Registruj se
-                </button>
+                </Button>
               </div>
             </form>
           ) : (
             <form onSubmit={onRegister} className="form">
               <div className="grid grid-2">
-                <div className="field">
-                  <label>Ime i prezime</label>
-                  <input
-                    type="text"
+                <FormField label="Ime i prezime" error={errors.name?.[0]}>
+                  <Input
                     name="name"
                     value={registerForm.name}
                     onChange={handleRegisterChange}
                     placeholder="Ana Anić"
                     required
                   />
-                  {errors.name && (
-                    <small className="err">{errors.name[0]}</small>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="field">
-                  <label>Telefon (opciono)</label>
-                  <input
-                    type="text"
+                <FormField label="Telefon (opciono)" error={errors.phone?.[0]}>
+                  <Input
                     name="phone"
                     value={registerForm.phone}
                     onChange={handleRegisterChange}
                     placeholder="+381 6x xxx xxxx"
                   />
-                  {errors.phone && (
-                    <small className="err">{errors.phone[0]}</small>
-                  )}
-                </div>
+                </FormField>
               </div>
 
               <div className="grid grid-2">
-                <div className="field">
-                  <label>Email</label>
-                  <input
+                <FormField label="Email" error={errors.email?.[0]}>
+                  <Input
                     type="email"
                     name="email"
                     value={registerForm.email}
@@ -197,14 +184,10 @@ export default function AuthPage() {
                     placeholder="you@example.com"
                     required
                   />
-                  {errors.email && (
-                    <small className="err">{errors.email[0]}</small>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="field">
-                  <label>Lozinka</label>
-                  <input
+                <FormField label="Lozinka" error={errors.password?.[0]}>
+                  <Input
                     type="password"
                     name="password"
                     value={registerForm.password}
@@ -212,37 +195,31 @@ export default function AuthPage() {
                     placeholder="min 6 karaktera"
                     required
                   />
-                  {errors.password && (
-                    <small className="err">{errors.password[0]}</small>
-                  )}
-                </div>
+                </FormField>
               </div>
 
               <div className="grid grid-2">
-                <div className="field">
-                  <label>Uloga</label>
-                  <select
+                <FormField label="Uloga" error={errors.role?.[0]}>
+                  <Select
                     name="role"
                     value={registerForm.role}
                     onChange={handleRegisterChange}
                     required
-                    className="select"
                   >
                     <option value="importer">Importer</option>
                     <option value="supplier">Supplier</option>
-                  </select>
-                  {errors.role && (
-                    <small className="err">{errors.role[0]}</small>
-                  )}
-                </div>
+                  </Select>
+                </FormField>
 
-                <div className="field">
-                  <label>Kompanija (opciono)</label>
-                  <select
+                <FormField
+                  label="Kompanija (opciono)"
+                  error={errors.company_id?.[0]}
+                  help={loadingCompanies ? "Učitavanje kompanija…" : undefined}
+                >
+                  <Select
                     name="company_id"
                     value={registerForm.company_id}
                     onChange={handleRegisterChange}
-                    className="select"
                     disabled={loadingCompanies}
                   >
                     <option value="">— Odaberi kompaniju —</option>
@@ -251,29 +228,25 @@ export default function AuthPage() {
                         {c.name} {c.type ? `(${c.type})` : ""}
                       </option>
                     ))}
-                  </select>
-                  {loadingCompanies && (
-                    <small className="muted">Učitavanje kompanija…</small>
-                  )}
-                  {errors.company_id && (
-                    <small className="err">{errors.company_id[0]}</small>
-                  )}
-                </div>
+                  </Select>
+                </FormField>
               </div>
 
-              <button
+              <Button
+                as="button"
                 type="submit"
-                className="btn btn--primary w-100"
+                variant="primary"
+                className="w-100"
                 disabled={loading}
               >
                 {loading ? "Registracija..." : "Kreiraj nalog"}
-              </button>
+              </Button>
 
               <div className="switch">
                 Već imaš nalog?{" "}
-                <button type="button" className="link" onClick={switchMode}>
+                <Button as="button" type="button" variant="link" onClick={switchMode}>
                   Prijavi se
-                </button>
+                </Button>
               </div>
             </form>
           )}
