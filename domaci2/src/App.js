@@ -11,13 +11,14 @@ import SupplierProductForm from './pages/supplier/SupplierProductForm';
 import SupplierProductImages from './pages/supplier/SupplierProductImages';
 import SupplierOffers from './pages/supplier/SupplierOffers';
 import SupplierOfferForm from './pages/supplier/SupplierOfferForm';
+import Breadcrumbs from './components/Breadcrumbs';
 function App() {
   return (
     <Router>
       <AuthProvider>
         <div className="App">
           <Navbar />
-
+          <Breadcrumbs />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<AuthPage />} />
