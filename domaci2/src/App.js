@@ -15,6 +15,8 @@ import Breadcrumbs from './components/Breadcrumbs';
 import ImporterDashboard from './pages/importer/ImporterDashboard';
 import ImporterSuppliers from './pages/importer/ImporterSuppliers';
 import ImporterPartnerships from './pages/importer/ImporterPartnerships';
+import ImporterContainerForm from './pages/importer/ImporterContainerForm';
+import ImporterContainers from './pages/importer/ImporterContainers';
 function App() {
   return (
     <Router>
@@ -44,6 +46,9 @@ function App() {
            <Route path="/importer" element={<ImporterDashboard />} />
            <Route path="/importer/suppliers" element={<ImporterSuppliers />} />
             <Route path="/importer/partnerships" element={<ImporterPartnerships />} />
+            <Route path="/importer/containers" element={<ImporterContainers />} />
+              <Route path="/importer/containers/new" element={<ImporterContainerForm />} />
+            <Route path="/importer/containers/:id/edit" element={<ImporterContainerForm />} />
           </Routes>
         </div>
       </AuthProvider>

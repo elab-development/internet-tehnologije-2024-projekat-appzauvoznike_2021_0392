@@ -9,6 +9,10 @@ const LABELS = {
   images: "Slike",
   new: "Novi",
   edit: "Izmena",
+  importer: "Importer",
+  suppliers: "Dobavljači",
+  partnerships: "Partnerstva",
+  containers: "Kontejneri",
 };
 
 function humanize(segment) {

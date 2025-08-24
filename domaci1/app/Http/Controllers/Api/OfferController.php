@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ImporterSupplier;
 use App\Models\Offer;
 use App\Models\OfferItem;
 use Illuminate\Http\Request;
@@ -11,28 +12,46 @@ use Illuminate\Support\Facades\Auth;
 class OfferController extends Controller
 {
     /**
-     * Lista svih ponuda (sa stavkama)
+     * Lista svih ponuda (sa stavkama) - dopunjeno za seminarski tako da istu metodu poziva i supplier i importer ali ako je supplier onda on vidi samo svoje ponude, a ako je importer onda vidi sve ponude od dobavljaca koji su mu
      */
-    public function index()
-    {
-        $user = Auth::user();
+ 
+        
 
-        $query = Offer::with(['supplier','items.product']);
+        public function index(Request $request)
+        {
+            $user = Auth::user();
 
-        if ($user->role === 'supplier') {
-            $query->where('supplier_company_id', $user->company_id);
+            // Admin – vidi sve, po želji bez filtera
+            if ($user->role === 'admin') {
+                return Offer::with(['supplier','items.product'])->get();
+            }
+
+            // Supplier – vidi samo svoje ponude
+            if ($user->role === 'supplier') {
+                return Offer::with(['supplier','items.product'])
+                    ->where('supplier_company_id', $user->company_id)
+                    ->get();
+            }
+
+            // Importer – vidi ponude SAMO partner dobavljača
+            if ($user->role === 'importer') {
+                // pokupi sve partner-suppliere za importera
+                $supplierIds = ImporterSupplier::query()
+                    ->where('importer_company_id', $user->company_id)
+                    // ako želiš da vidi samo aktivna partnerstva, odkomentariši:
+                    //->where('status', 'active')
+                    ->pluck('supplier_company_id');
+
+                return Offer::with(['supplier','items.product'])
+                    ->whereIn('supplier_company_id', $supplierIds)
+                    // ako želiš da importer vidi samo objavljene:
+                    //->where('status', 'published')
+                    ->get();
+            }
+
+            return response()->json([], 200);
         }
 
-        if ($user->role === 'importer') {
-            $supplierIds = $user->company
-                ->suppliers()
-                ->wherePivot('status','active')
-                ->pluck('companies.id');
-            $query->whereIn('supplier_company_id', $supplierIds);
-        }
-
-        return $query->get();
-    }
 
     /**
      * Kreiranje nove ponude (samo supplier)
