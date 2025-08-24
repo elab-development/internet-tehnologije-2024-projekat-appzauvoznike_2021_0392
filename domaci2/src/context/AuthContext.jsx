@@ -28,15 +28,23 @@ export function AuthProvider({ children }) {
     boot();
   }, []);
 
-  const login = (userData, token) => {
-    localStorage.setItem("token", token);
-    setUser(userData);
-    // Redirect po ulozi
-    const role = userData.role;
-    if (role === "admin") navigate("/admin", { replace: true });
-    else if (role === "supplier") navigate("/supplier", { replace: true });
-    else navigate("/importer", { replace: true });
-  };
+const login = (userData, token) => {
+  localStorage.setItem("token", token);
+  setUser(userData);
+
+  const role = String(userData?.role || "").trim().toLowerCase();
+
+  if (role === "admin") {
+    navigate("/admin", { replace: true });
+  } else if (role === "supplier") {
+    navigate("/supplier", { replace: true });
+  } else if (role === "importer") {
+    navigate("/importer", { replace: true });
+  } else {
+    // fallback ako backend vrati nešto neočekivano
+    navigate("/", { replace: true });
+  }
+};
 
   const logout = async () => {
     try { await api.post("/auth/logout"); } catch {}
