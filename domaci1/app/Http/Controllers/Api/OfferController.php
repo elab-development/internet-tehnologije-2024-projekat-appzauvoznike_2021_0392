@@ -165,9 +165,7 @@ class OfferController extends Controller
             return response()->json(['message'=>'Forbidden'], 403);
         }
 
-        if ($item->offer_id !== $offer->id) {
-            return response()->json(['message'=>'Item not found in this offer'], 404);
-        }
+  
 
         $data = $request->validate([
             'unit_price'          => 'numeric',
@@ -194,10 +192,7 @@ class OfferController extends Controller
             return response()->json(['message'=>'Forbidden'], 403);
         }
 
-        if ($item->offer_id !== $offer->id) {
-            return response()->json(['message'=>'Item not found in this offer'], 404);
-        }
-
+    
         $item->delete();
         return response()->json(['message'=>'Offer item deleted']);
     }

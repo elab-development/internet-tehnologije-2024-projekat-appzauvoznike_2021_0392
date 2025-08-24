@@ -26,7 +26,7 @@ export default function SupplierOfferForm() {
   const [msg, setMsg] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // učitaj ponudu (za edit) + listu mojih proizvoda (za dodavanje stavki)
+  // učitaj ponudu (za edit) + listu mojih proizvoda
   useEffect(() => {
     const boot = async () => {
       setLoading(true); setMsg(null);
@@ -47,8 +47,9 @@ export default function SupplierOfferForm() {
           });
           setItems(data.items || []);
         }
-      } catch {
+      } catch (e) {
         setMsg("Greška pri učitavanju podataka.");
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -66,9 +67,10 @@ export default function SupplierOfferForm() {
       else await createOffer(form);
       navigate("/supplier/offers", { replace: true });
     } catch (err) {
-      const res = err.response?.data;
+      const res = err?.response?.data;
       setMsg(res?.message || "Greška pri snimanju ponude.");
       if (res?.errors) setErrors(res.errors);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -93,40 +95,76 @@ export default function SupplierOfferForm() {
   const chItem = (e) =>
     setDraftItem((s) => ({ ...s, [e.target.name]: e.target.value }));
 
+  const normalizeNumber = (val, parser = parseFloat) => {
+    if (val === "" || val === null || val === undefined) return null;
+    const num = parser(val);
+    return Number.isNaN(num) ? null : num;
+  };
+
   const addItemNow = async () => {
     if (!isEdit) { setMsg("Prvo sačuvaj ponudu, pa dodaj stavke."); return; }
-    const payload = {
-      product_id: +draftItem.product_id,
-      unit_price: draftItem.unit_price,
-      currency: draftItem.currency || "EUR",
-      min_order_qty: draftItem.min_order_qty || 1,
-      pack_qty: draftItem.pack_qty || null,
-      import_cost_per_unit: draftItem.import_cost_per_unit || null,
-      discount_percent: draftItem.discount_percent || null,
-      notes: draftItem.notes || null,
-    };
-    const { data } = await addOfferItem(id, payload);
-    setItems((arr) => [...arr, data]);
-    setDraftItem(emptyItem);
+    try {
+      setMsg(null);
+      const payload = {
+        product_id: +draftItem.product_id,
+        unit_price: normalizeNumber(draftItem.unit_price, parseFloat), // obavezno
+        currency: (draftItem.currency || "EUR").toUpperCase(),
+        min_order_qty: normalizeNumber(draftItem.min_order_qty, parseInt) ?? 1,
+        pack_qty: normalizeNumber(draftItem.pack_qty, parseInt),
+        import_cost_per_unit: normalizeNumber(draftItem.import_cost_per_unit, parseFloat),
+        discount_percent: normalizeNumber(draftItem.discount_percent, parseFloat),
+        notes: draftItem.notes || null,
+      };
+      if (payload.unit_price === null) {
+        setMsg("Cena je obavezna.");
+        return;
+      }
+      const { data } = await addOfferItem(id, payload);
+      setItems((arr) => [...arr, data]);
+      setDraftItem(emptyItem);
+    } catch (err) {
+      const res = err?.response?.data;
+      setMsg(res?.message || "Greška pri dodavanju stavke.");
+      console.error(err);
+    }
   };
 
   const saveItem = async (it) => {
-    const payload = {
-      unit_price: it.unit_price,
-      currency: it.currency,
-      min_order_qty: it.min_order_qty,
-      pack_qty: it.pack_qty,
-      import_cost_per_unit: it.import_cost_per_unit,
-      discount_percent: it.discount_percent,
-      notes: it.notes,
-    };
-    const { data } = await updateOfferItem(id, it.id, payload);
-    setItems((arr) => arr.map((x) => (x.id === it.id ? data : x)));
+    try {
+      setMsg(null);
+      const payload = {
+        unit_price: normalizeNumber(it.unit_price, parseFloat),
+        currency: it.currency?.toUpperCase?.() || "EUR",
+        min_order_qty: normalizeNumber(it.min_order_qty, parseInt),
+        pack_qty: normalizeNumber(it.pack_qty, parseInt),
+        import_cost_per_unit: normalizeNumber(it.import_cost_per_unit, parseFloat),
+        discount_percent: normalizeNumber(it.discount_percent, parseFloat),
+        notes: it.notes || null,
+      };
+      if (payload.unit_price === null) {
+        setMsg("Cena je obavezna.");
+        return;
+      }
+      const { data } = await updateOfferItem(id, it.id, payload);
+      setItems((arr) => arr.map((x) => (x.id === it.id ? data : x)));
+    } catch (err) {
+      const res = err?.response?.data;
+      setMsg(res?.message || "Greška pri snimanju stavke.");
+      console.error(err);
+    }
   };
 
   const removeItem = async (itemId) => {
-    await deleteOfferItem(id, itemId);
-    setItems((arr) => arr.filter((x) => x.id !== itemId));
+    if (!window.confirm("Obrisati stavku?")) return;
+    try {
+      setMsg(null);
+      await deleteOfferItem(id, itemId);
+      setItems((arr) => arr.filter((x) => x.id !== itemId));
+    } catch (err) {
+      const res = err?.response?.data;
+      setMsg(res?.message || "Greška pri brisanju stavke.");
+      console.error(err);
+    }
   };
 
   return (
@@ -177,52 +215,89 @@ export default function SupplierOfferForm() {
           </div>
         </div>
 
-        <button className="btn btn--primary" disabled={loading}>
+        <button className="btn btn--primary" disabled={loading} type="submit">
           {isEdit ? "Sačuvaj" : "Kreiraj"}
         </button>
       </form>
 
-      {/* STAVKE – prikaz i upravljanje (samo kad je ponuda već kreirana) */}
+      {/* STAVKE */}
       {isEdit && (
         <>
           <h3 style={{ marginTop: 28 }}>Stavke</h3>
 
-          <table className="table" style={{ marginTop: 8 }}>
-            <thead>
-              <tr>
-                <th>Proizvod</th>
-                <th>Cena</th>
-                <th>Valuta</th>
-                <th>MOQ</th>
-                <th>Pak.</th>
-                <th>Uvozni trošak</th>
-                <th>Popust %</th>
-                <th>Napomena</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((it) => (
-                <tr key={it.id}>
-                  <td>{it.product?.code} — {it.product?.name}</td>
-                  <td><input value={it.unit_price ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,unit_price:e.target.value}:x))} className="input" style={{minWidth:90}}/></td>
-                  <td><input value={it.currency ?? "EUR"} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,currency:e.target.value}:x))} className="input" style={{minWidth:70}}/></td>
-                  <td><input value={it.min_order_qty ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,min_order_qty:e.target.value}:x))} className="input" style={{minWidth:70}}/></td>
-                  <td><input value={it.pack_qty ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,pack_qty:e.target.value}:x))} className="input" style={{minWidth:70}}/></td>
-                  <td><input value={it.import_cost_per_unit ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,import_cost_per_unit:e.target.value}:x))} className="input" style={{minWidth:90}}/></td>
-                  <td><input value={it.discount_percent ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,discount_percent:e.target.value}:x))} className="input" style={{minWidth:80}}/></td>
-                  <td><input value={it.notes ?? ""} onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,notes:e.target.value}:x))} className="input"/></td>
-                  <td className="actions">
-                    <button className="btn btn--ghost" onClick={()=>saveItem(it)}>Snimi</button>{" "}
-                    <button className="link danger" onClick={()=>removeItem(it.id)}>Obriši</button>
-                  </td>
+          <div className="table-responsive">
+            <table className="table table--tight">
+              <thead>
+                <tr>
+                  <th>Proizvod</th>
+                  <th>Cena</th>
+                  <th>Valuta</th>
+                  <th>MOQ</th>
+                  <th>Pak.</th>
+                  <th>Uvozni trošak</th>
+                  <th>Popust %</th>
+                  <th>Napomena</th>
+                  <th></th>
                 </tr>
-              ))}
-              {!items.length && (
-                <tr><td colSpan={9}><div className="empty">Još nema stavki.</div></td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map((it) => (
+                  <tr key={it.id}>
+                    <td data-label="Proizvod">{it.product?.code} — {it.product?.name}</td>
+                    <td data-label="Cena">
+                      <input type="number" step="0.01"
+                        value={it.unit_price ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,unit_price:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="Valuta">
+                      <input
+                        value={it.currency ?? "EUR"}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,currency:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="MOQ">
+                      <input type="number"
+                        value={it.min_order_qty ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,min_order_qty:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="Pak.">
+                      <input type="number"
+                        value={it.pack_qty ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,pack_qty:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="Uvozni trošak">
+                      <input type="number" step="0.01"
+                        value={it.import_cost_per_unit ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,import_cost_per_unit:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="Popust %">
+                      <input type="number" step="0.01"
+                        value={it.discount_percent ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,discount_percent:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td data-label="Napomena">
+                      <input
+                        value={it.notes ?? ""}
+                        onChange={(e)=>setItems(xs=>xs.map(x=>x.id===it.id?{...x,notes:e.target.value}:x))}
+                        className="input w-100"/>
+                    </td>
+                    <td className="actions">
+                      <button className="btn btn--ghost" type="button" onClick={()=>saveItem(it)}>Snimi</button>{" "}
+                      <button className="link danger" type="button" onClick={()=>removeItem(it.id)}>Obriši</button>
+                    </td>
+                  </tr>
+                ))}
+                {!items.length && (
+                  <tr><td colSpan={9}><div className="empty">Još nema stavki.</div></td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
           <h4 style={{ marginTop: 18 }}>Dodaj stavku</h4>
           <div className="grid grid-6" style={{ alignItems: "end", gap: 8 }}>
@@ -234,7 +309,8 @@ export default function SupplierOfferForm() {
             </div>
             <div className="field">
               <label>Cena</label>
-              <input name="unit_price" value={draftItem.unit_price} onChange={chItem}/>
+              <input name="unit_price" type="number" step="0.01"
+                value={draftItem.unit_price} onChange={chItem}/>
             </div>
             <div className="field">
               <label>Valuta</label>
@@ -242,11 +318,13 @@ export default function SupplierOfferForm() {
             </div>
             <div className="field">
               <label>MOQ</label>
-              <input name="min_order_qty" type="number" value={draftItem.min_order_qty} onChange={chItem}/>
+              <input name="min_order_qty" type="number"
+                value={draftItem.min_order_qty} onChange={chItem}/>
             </div>
             <div className="field">
               <label>Pak.</label>
-              <input name="pack_qty" value={draftItem.pack_qty} onChange={chItem}/>
+              <input name="pack_qty" type="number"
+                value={draftItem.pack_qty} onChange={chItem}/>
             </div>
             <div className="field">
               <button className="btn btn--primary" onClick={addItemNow} type="button">Dodaj</button>

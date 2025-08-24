@@ -44,19 +44,25 @@ Route::middleware(['auth:sanctum','role:admin'])->prefix('admin')->group(functio
 });
 
 // ==================== SUPPLIER ====================
-Route::middleware(['auth:sanctum','role:supplier'])->prefix('supplier')->group(function () {
+Route::middleware(['auth:sanctum','role:supplier'])->prefix('supplier')->scopeBindings()->group(function () {
     // Supplier upravlja samo svojim proizvodima
     Route::apiResource('products', ProductController::class);
     Route::get('products-search', [ProductController::class, 'search']);
 
     // Slike proizvoda
-    Route::apiResource('products.images', ProductImageController::class);
+          // Dodajemo "->parameters(['images' => 'productImage'])" da bi ime parametra u ruti
+        // bilo {productImage}, isto kao tip hint u kontroleru (ProductImage $productImage).
+        // Bez ovoga Laravel bi koristio {image}, pa bi route–model binding pravio 404.
+        Route::apiResource('products.images', ProductImageController::class)
+            ->parameters(['images' => 'productImage']);
 
+ 
     // Supplier kreira i menja svoje ponude
-    Route::apiResource('offers', OfferController::class);
-    Route::post('offers/{offer}/items', [OfferController::class, 'addItem']);
-    Route::put('offers/{offer}/items/{item}', [OfferController::class, 'updateItem']);
-    Route::delete('offers/{offer}/items/{item}', [OfferController::class, 'destroyItem']);
+    Route::apiResource('offers', OfferController::class); 
+    Route::post   ('offers/{offer}/items',            [OfferController::class, 'addItem']);
+    Route::put    ('offers/{offer}/items/{item}',     [OfferController::class, 'updateItem']);
+    Route::delete ('offers/{offer}/items/{item}',     [OfferController::class, 'destroyItem']);
+
 });
 
 // ==================== IMPORTER ====================
