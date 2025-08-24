@@ -10,9 +10,7 @@ export default function AdminDashboard() {
           <h1>Admin Dashboard</h1>
           <p>Centralno upravljanje kompanijama, partnerstvima, ponudama i kontejnerima.</p>
         </div>
-        <div className="admin-hero__cta">
-          <Link to="/admin/companies" className="btn btn--primary">+ Nova kompanija</Link>
-        </div>
+     
       </header>
 
       <nav className="tabs tabs--pill">
