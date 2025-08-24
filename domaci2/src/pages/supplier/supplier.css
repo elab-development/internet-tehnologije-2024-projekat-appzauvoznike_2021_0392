@@ -578,3 +578,33 @@ body {
   .pager { flex-direction: column; align-items: stretch; }
   .pager-right { justify-content: space-between; }
 }
+/* Dvokolonski raspored: tabela + sidebar */
+.grid-2-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+}
+@media (max-width: 980px) {
+  .grid-2-layout { grid-template-columns: 1fr; }
+}
+
+/* FX kartica (sidebar) */
+.fx-card {
+  position: sticky;
+  top: 80px;
+  background: var(--surface, #141622);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+.fx-head { margin-bottom: 8px; }
+.fx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fx-field { display: grid; gap: 6px; }
+.fx-result {
+  margin: 10px 0 8px;
+  font-size: 15px;
+}
+.fx-note { margin-top: 10px; color: var(--muted, #9aa3b2); font-size: 13px; }
+
+/* mala pomoćna klasa */
+.muted { color: var(--muted, #9aa3b2); font-size: 12px; }

@@ -1,7 +1,86 @@
 // src/pages/supplier/SupplierProductForm.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createProduct, getMyProduct, updateProduct } from "../../api/supplier";
+import "./supplier.css";
+
+/* ================= FX helpers (robust) ================= */
+const RATES_TTL_MS = 12 * 60 * 60 * 1000; // 12h
+
+async function fetchRatesFromPrimary(base) {
+  const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}`);
+  if (!res.ok) throw new Error("exchangerate.host down");
+  const j = await res.json();
+  if (!j?.rates) throw new Error("bad payload");
+  return j.rates;
+}
+
+async function fetchRatesFromFallback(base) {
+  // frankfurter.app koristi parametar 'from'
+  const res = await fetch(`https://api.frankfurter.app/latest?from=${encodeURIComponent(base)}`);
+  if (!res.ok) throw new Error("frankfurter.app down");
+  const j = await res.json();
+  if (!j?.rates) throw new Error("bad payload");
+  return j.rates;
+}
+
+function useFxRates(base = "EUR") {
+  const [rates, setRates] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
+  const [fxBase, setFxBase] = useState(base);
+
+  useEffect(() => {
+    const key = `fx:${fxBase}`;
+    const cached = localStorage.getItem(key);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < RATES_TTL_MS) {
+          setRates(parsed.rates);
+          return;
+        }
+      } catch {}
+    }
+
+    (async () => {
+      setLoading(true);
+      setErr(null);
+      try {
+        let r = await fetchRatesFromPrimary(fxBase);
+        // osiguraj da postoji i sama baza
+        r = { [fxBase]: 1, ...r };
+        setRates(r);
+        localStorage.setItem(key, JSON.stringify({ ts: Date.now(), rates: r }));
+      } catch {
+        try {
+          let r = await fetchRatesFromFallback(fxBase);
+          r = { [fxBase]: 1, ...r };
+          setRates(r);
+          localStorage.setItem(key, JSON.stringify({ ts: Date.now(), rates: r }));
+        } catch (e2) {
+          setErr("Ne mogu da učitam kurseve.");
+          setRates(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [fxBase]);
+
+  return { rates, loading, err, base: fxBase, setBase: setFxBase };
+}
+
+function rateAB(rates, /*base not needed*/ _base, from, to) {
+  if (!rates) return null;
+  if (from === to) return 1;
+  const rB = rates[to];
+  const rA = rates[from];
+  if (!rA || !rB) return null;      // nedostaje simbol
+  return rB / rA;                   // A->B = (base->B)/(base->A)
+}
+/* =============== kraj FX ===================== */
+
 
 const EMPTY = {
   code: "",
@@ -9,7 +88,7 @@ const EMPTY = {
   description: "",
   base_price: "",
   currency: "EUR",
-  image_url: "",        // backend zahteva da postoji (kod tebe je required)
+  image_url: "",
   length_mm: "",
   width_mm: "",
   height_mm: "",
@@ -20,7 +99,7 @@ const EMPTY = {
 };
 
 export default function SupplierProductForm() {
-  const { id } = useParams();        // /supplier/products/:id/edit
+  const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
@@ -28,6 +107,12 @@ export default function SupplierProductForm() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [errors, setErrors] = useState({});
+
+  // FX state (ciljna valuta za preview i/ili prebacivanje)
+  const [fxTo, setFxTo] = useState("USD");
+  const { rates, loading: fxLoading, err: fxErr, base: fxBase, setBase: setFxBase } = useFxRates(form.currency || "EUR");
+
+  useEffect(() => { setFxBase(form.currency || "EUR"); }, [form.currency, setFxBase]);
 
   // učitaj proizvod kod izmene
   useEffect(() => {
@@ -53,7 +138,7 @@ export default function SupplierProductForm() {
           characteristics: data.characteristics ?? {},
           is_active: Boolean(data.is_active ?? true),
         });
-      } catch (e) {
+      } catch {
         setMsg("Ne mogu da učitam proizvod.");
       } finally {
         setLoading(false);
@@ -70,7 +155,6 @@ export default function SupplierProductForm() {
     setMsg(null);
     setErrors({});
     try {
-      // minimalan payload koji backend očekuje
       const payload = {
         category_id: form.category_id || null,
         code: form.code,
@@ -100,6 +184,31 @@ export default function SupplierProductForm() {
     }
   };
 
+  // izračunaj preview konverziju
+  const converted = useMemo(() => {
+    const price = parseFloat(form.base_price);
+    if (!rates || !form.currency || !fxTo || Number.isNaN(price)) return null;
+    const r = rateAB(rates, fxBase, form.currency, fxTo);
+    if (!r) return null;
+    return price * r;
+  }, [rates, fxBase, form.currency, fxTo, form.base_price]);
+
+  const applyConversion = () => {
+    if (converted == null) return;
+    setForm(s => ({
+      ...s,
+      base_price: (Math.round(converted * 100) / 100).toFixed(2),
+      currency: fxTo
+    }));
+  };
+
+  const symbols = useMemo(() => {
+    if (!rates) return ["EUR","USD","RSD","GBP","CHF"];
+    const list = Object.keys(rates).sort();
+    if (!list.includes(form.currency)) list.unshift(form.currency);
+    return list;
+  }, [rates, form.currency]);
+
   return (
     <div className="container">
       <h2>{isEdit ? "Izmena proizvoda" : "Novi proizvod"}</h2>
@@ -119,7 +228,8 @@ export default function SupplierProductForm() {
           </div>
         </div>
 
-        <div className="grid grid-2">
+        {/* Cena + Valuta + FX konvertor */}
+        <div className="grid grid-3">
           <div className="field">
             <label>Cena</label>
             <input
@@ -132,10 +242,29 @@ export default function SupplierProductForm() {
             />
             {errors.base_price && <small className="err">{errors.base_price[0]}</small>}
           </div>
+
           <div className="field">
             <label>Valuta</label>
             <input name="currency" value={form.currency} onChange={ch} />
             {errors.currency && <small className="err">{errors.currency[0]}</small>}
+          </div>
+
+          <div className="field fx-inline">
+            <label>Preračun u</label>
+            <div className="fx-inline-row">
+              <select className="select" value={fxTo} onChange={(e)=>setFxTo(e.target.value)}>
+                {symbols.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <div className="fx-inline-value">
+                {fxLoading ? "…" : fxErr ? "N/A" : (converted != null ? `${converted.toFixed(2)} ${fxTo}` : "—")}
+              </div>
+              <button type="button" className="btn btn--ghost" onClick={applyConversion} disabled={converted == null}>
+                Postavi cenu u {fxTo}
+              </button>
+            </div>
+            <small className="muted">
+              Izvor kursa: exchangerate.host • baza {fxBase}
+            </small>
           </div>
         </div>
 
