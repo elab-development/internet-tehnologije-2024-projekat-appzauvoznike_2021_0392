@@ -17,6 +17,9 @@ import ImporterSuppliers from './pages/importer/ImporterSuppliers';
 import ImporterPartnerships from './pages/importer/ImporterPartnerships';
 import ImporterContainerForm from './pages/importer/ImporterContainerForm';
 import ImporterContainers from './pages/importer/ImporterContainers';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminCompanies from './pages/admin/AdminCompanies';
+import AdminOverview from './pages/admin/AdminOverview';
 function App() {
   return (
     <Router>
@@ -49,6 +52,18 @@ function App() {
             <Route path="/importer/containers" element={<ImporterContainers />} />
               <Route path="/importer/containers/new" element={<ImporterContainerForm />} />
             <Route path="/importer/containers/:id/edit" element={<ImporterContainerForm />} />
+
+            <Route path="/admin" element={<AdminDashboard />}>
+              {/* OVDE je “Overview” kao index pod-ruta */}
+              <Route index element={<AdminOverview />} />
+              <Route path="companies" element={<AdminCompanies />} /> 
+              {/* ostali tabovi ako ih imaš */}
+              {/* */}
+              {/* <Route path="partnerships" element={<AdminPartnerships />} /> */}
+              {/* <Route path="products" element={<AdminProducts />} /> */}
+              {/* <Route path="offers" element={<AdminOffers />} /> */}
+              {/* <Route path="containers" element={<AdminContainers />} /> */}
+            </Route>
           </Routes>
         </div>
       </AuthProvider>
