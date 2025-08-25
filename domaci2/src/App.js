@@ -20,6 +20,7 @@ import ImporterContainers from './pages/importer/ImporterContainers';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCompanies from './pages/admin/AdminCompanies';
 import AdminOverview from './pages/admin/AdminOverview';
+import AdminPartnerships from './pages/admin/AdminPartnerships';
 function App() {
   return (
     <Router>
@@ -33,18 +34,13 @@ function App() {
              <Route path="/supplier" element={<SupplierDashboard />} />
              <Route path="/supplier/products" element={<SupplierProducts />} />
              <Route path="/supplier/products/new" element={<SupplierProductForm />} />
-            <Route path="/supplier/products/:id/edit" element={<SupplierProductForm />} />
-          
+            <Route path="/supplier/products/:id/edit" element={<SupplierProductForm />} />          
             {/* Slike proizvoda */}
             <Route path="/supplier/products/:id/images" element={<SupplierProductImages />} />
-
             {/* Ponude */}
             <Route path="/supplier/offers" element={<SupplierOffers />} />
             <Route path="/supplier/offers/new" element={<SupplierOfferForm />} />
             <Route path="/supplier/offers/:id/edit" element={<SupplierOfferForm />} />
-
-
-
             {/* za seminarski */}
            <Route path="/importer" element={<ImporterDashboard />} />
            <Route path="/importer/suppliers" element={<ImporterSuppliers />} />
@@ -52,17 +48,12 @@ function App() {
             <Route path="/importer/containers" element={<ImporterContainers />} />
               <Route path="/importer/containers/new" element={<ImporterContainerForm />} />
             <Route path="/importer/containers/:id/edit" element={<ImporterContainerForm />} />
-
             <Route path="/admin" element={<AdminDashboard />}>
               {/* OVDE je “Overview” kao index pod-ruta */}
               <Route index element={<AdminOverview />} />
               <Route path="companies" element={<AdminCompanies />} /> 
-              {/* ostali tabovi ako ih imaš */}
-              {/* */}
-              {/* <Route path="partnerships" element={<AdminPartnerships />} /> */}
-              {/* <Route path="products" element={<AdminProducts />} /> */}
-              {/* <Route path="offers" element={<AdminOffers />} /> */}
-              {/* <Route path="containers" element={<AdminContainers />} /> */}
+              <Route path="partnerships" element={<AdminPartnerships />} />
+ 
             </Route>
           </Routes>
         </div>

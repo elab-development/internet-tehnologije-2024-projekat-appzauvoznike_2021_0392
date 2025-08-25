@@ -17,9 +17,7 @@ export default function AdminDashboard() {
         <NavLink end to="/admin" className={({isActive}) => isActive ? "active" : ""}>Overview</NavLink>
         <NavLink to="/admin/companies" className={({isActive}) => isActive ? "active" : ""}>Kompanije</NavLink>
         <NavLink to="/admin/partnerships" className={({isActive}) => isActive ? "active" : ""}>Partnerstva</NavLink>
-        <NavLink to="/admin/products" className={({isActive}) => isActive ? "active" : ""}>Proizvodi</NavLink>
-        <NavLink to="/admin/offers" className={({isActive}) => isActive ? "active" : ""}>Ponude</NavLink>
-        <NavLink to="/admin/containers" className={({isActive}) => isActive ? "active" : ""}>Kontejneri</NavLink>
+    
       </nav>
 
       <div className="admin-body">
